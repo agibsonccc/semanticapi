@@ -21,3 +21,5 @@ Setup:
 	2. Modify project/Build.scala and remove the 2.0 due to it having an invalid identifier
 	3. sbt package
 	4. Upload target/scala-verssion/play-2-spring-module_*.jar to your maven repository, and enter it in to your pom
+5. This assumes mvn is in your classpath: 
+      Now: git clone https://github.com/greenlaw110/play-morphia && cd play-morphia && mvn clean install

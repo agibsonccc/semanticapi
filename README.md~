@@ -19,4 +19,5 @@ Setup:
 4. Next install https://github.com/wsargent/play-2.0-spring-module:
 	1. cd play-2.0-spring-module
 	2. Modify project/Build.scala and remove the 2.0 due to it having an invalid identifier
-	3. 
+	3. sbt package
+	4. Upload target/scala-verssion/play-2-spring-module_*.jar to your maven repository, and enter it in to your pom
