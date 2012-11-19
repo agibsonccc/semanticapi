@@ -7,3 +7,15 @@ GET     /                           controllers.Application.index()
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
+PUT		/concept					controllers.ConceptController.insert(concept:com.ccc.sendalyzeit.expertsystem.model.Concept)
+GET		/concept/:id				controllers.ConceptController.byId(id:Long)
+GET 	/concept					controllers.ConceptController.concepts()
+DELETE	/concept/:id				controllers.ConceptController.delete(id:Long)
+
+PUT		/entity/					controllers.EntityController.insert(entity:com.ccc.sendalyzeit.expertsystem.model.Entity)
+GET		/entity/:id					controllers.EntityController.getById(id:Long)
+DELETE  /entity/:id                 controllers.EntityController.delete(id:Long)
+
+POST   /observe						controllers.ObservationController.map()
+POST   /observe/entities			controllers.ObservationController.entities(text:String)
+POST   /observe/concepts			controllers.ObservationController.concepts(text:String)

@@ -4,22 +4,18 @@
 	<groupId>semanticapi</groupId>
 	<artifactId>semanticapi</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-
+	<packaging>war</packaging>
 	<repositories>
+
 		<repository>
-			<id>typesafe</id>
-			<name>typesafe-releases</name>
-			<url>http://repo.typesafe.com/typesafe/repo</url>
+			<id>ccc</id>
+			<url>http://www.clevercloudcomputing.com/nexus/content/repositories/CCC/</url>
 			<releases>
 				<enabled>true</enabled>
 			</releases>
 		</repository>
+		
 
-		<repository>
-			<id>ccc</id>
-			<url>http://www.clevercloudcomputing.com/nexus/content/repositories/CCC
-                        </url>
-		</repository>
 		<repository>
 			<id>play2maven</id>
 			<name>play2maven-release</name>
@@ -191,7 +187,7 @@
 				<groupId>de.akquinet.innovation.play2</groupId>
 				<artifactId>play2-maven-plugin</artifactId>
 				<version>1.2.1</version>
-				  <extensions>true</extensions>
+				<extensions>true</extensions>
 			</plugin>
 		</plugins>
 	</build>
@@ -200,8 +196,9 @@
 			<groupId>play-spring</groupId>
 			<artifactId>play2-spring-module</artifactId>
 			<version>2.92</version>
-			<classifier>module_2</classifier>
+
 			<type>92.jar</type>
+			<classifier>module_2</classifier>
 		</dependency>
 		<!-- Play Framework Dependencies -->
 
@@ -215,7 +212,7 @@
 			<artifactId>play_2.9.1</artifactId>
 			<version>2.0.4</version>
 		</dependency>
-			<dependency>
+		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-web</artifactId>
 			<exclusions>
@@ -225,7 +222,7 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>com.google.api-client</groupId>
 			<artifactId>google-api-client</artifactId>
@@ -256,13 +253,6 @@
 			<groupId>com.ccc.relationextraction</groupId>
 			<artifactId>relationextraction</artifactId>
 			<version>0.0.1</version>
-
-			<exclusions>
-				<exclusion>
-					<artifactId>commons-logging-api</artifactId>
-					<groupId>commons-logging</groupId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 
 		<dependency>
@@ -331,12 +321,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-test-mvc</artifactId>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
 			<groupId>javax.xml</groupId>
 			<artifactId>jaxb-impl</artifactId>
 			<version>2.1</version>
@@ -382,7 +366,11 @@
 			<artifactId>spring-security-oauth2</artifactId>
 			<version>1.0.0.RELEASE</version>
 		</dependency>
-		
+
+		<dependency>
+			<groupId>com.ccc.questionanswering</groupId>
+			<artifactId>query-answer</artifactId>
+			<version>0.0.2-SNAPSHOT</version>
+		</dependency>
 	</dependencies>
-	<packaging>war</packaging>
 </project>
