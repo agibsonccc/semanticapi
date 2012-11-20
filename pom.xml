@@ -4,7 +4,7 @@
 	<groupId>semanticapi</groupId>
 	<artifactId>semanticapi</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<packaging>war</packaging>
+	<packaging>play2</packaging>
 	<repositories>
 
 		<repository>
@@ -188,6 +188,10 @@
 				<artifactId>play2-maven-plugin</artifactId>
 				<version>1.2.1</version>
 				<extensions>true</extensions>
+				<configuration>
+					<play2Home>/home/agibsonccc/play</play2Home>
+					<buildDist>false</buildDist>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
@@ -196,16 +200,8 @@
 			<groupId>play-spring</groupId>
 			<artifactId>play2-spring-module</artifactId>
 			<version>2.92</version>
-
-			<type>92.jar</type>
-			<classifier>module_2</classifier>
 		</dependency>
-		<dependency>
-			<groupId>com.github.greenlaw110.play-morphia</groupId>
-			<artifactId>play-morphia</artifactId>
-			<version>1.2.7</version>
 
-		</dependency>
 		<!-- Play Framework Dependencies -->
 
 		<dependency>
@@ -377,6 +373,12 @@
 			<groupId>com.ccc.questionanswering</groupId>
 			<artifactId>query-answer</artifactId>
 			<version>0.0.2-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.github.jmkgreen.morphia</groupId>
+			<artifactId>morphia</artifactId>
+			<version>1.0</version>
 		</dependency>
 	</dependencies>
 </project>
