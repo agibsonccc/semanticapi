@@ -7,11 +7,14 @@ GET     /                           controllers.Application.index()
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
+
+GET		/concept					controllers.ConceptController.allConcepts()
 PUT		/concept					controllers.ConceptController.insert(concept:String)
 GET		/concept/:id				controllers.ConceptController.byId(id:Long)
 GET 	/concept					controllers.ConceptController.concepts(name:String,id:Long)
 DELETE	/concept/:id				controllers.ConceptController.delete(id:Long)
 
+GET     /entity						controllers.EntityController.allEntities()
 PUT		/entity/					controllers.EntityController.insert(entity:String)
 GET		/entity/:id					controllers.EntityController.getById(id:Long)
 DELETE  /entity/:id                 controllers.EntityController.delete(id:Long)
