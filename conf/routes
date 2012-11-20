@@ -3,21 +3,20 @@
 # ~~~~
 
 # Home page
-GET     /                           controllers.Application.index()
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
 
-GET		/concept					controllers.ConceptController.allConcepts()
-PUT		/concept					controllers.ConceptController.insert()
-GET		/concept/:id				controllers.ConceptController.byId(id:Long)
-GET 	/concept					controllers.ConceptController.concepts(name:String,id:Long)
-DELETE	/concept/:id				controllers.ConceptController.delete(id:Long)
+GET		/concept/					controllers.ConceptController.allConcepts()
+PUT		/concept/					controllers.ConceptController.insert()
+GET		/concept/:id				controllers.ConceptController.byId(id)
+GET 	/concept/					controllers.ConceptController.concepts(name:String,id:Long)
+DELETE	/concept/:id				controllers.ConceptController.delete(id)
 
-GET     /entity						controllers.EntityController.allEntities()
+GET     /entity/					controllers.EntityController.allEntities()
 PUT		/entity/					controllers.EntityController.insert()
-GET		/entity/:id					controllers.EntityController.getById(id:Long)
-DELETE  /entity/:id                 controllers.EntityController.delete(id:Long)
+GET		/entity/:id				controllers.EntityController.getById(id)
+DELETE  /entity/:id              controllers.EntityController.delete(id)
 
 POST   /observe						controllers.ObservationController.map(text:String)
 POST   /observe/entities			controllers.ObservationController.entities(text:String)
