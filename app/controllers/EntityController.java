@@ -5,13 +5,11 @@ import static play.libs.Json.toJson;
 import java.util.Collections;
 
 import play.api.modules.spring.Spring;
-import play.mvc.Result;
 import play.mvc.Controller;
+import play.mvc.Result;
 
 import com.ccc.sendalyzeit.expertsystem.model.SemanticEntity;
 import com.ccc.sendalyzeit.expertsystem.service.api.EntityRepository;
-import com.github.jmkgreen.morphia.logging.MorphiaLoggerFactory;
-import com.github.jmkgreen.morphia.logging.slf4j.SLF4JLogrImplFactory;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -21,8 +19,6 @@ public class EntityController extends Controller {
 	private static EntityRepository entityRepo;
 	
 	public static void initBeans() {
-		MorphiaLoggerFactory.reset();
-		MorphiaLoggerFactory.registerLogger(SLF4JLogrImplFactory.class);
 		entityRepo=Spring.getBeanOfType(EntityRepository.class);
 	}
 	static {
@@ -34,7 +30,7 @@ public class EntityController extends Controller {
 		Gson gson=new GsonBuilder().create();
 		SemanticEntity e=gson.fromJson(entity, SemanticEntity.class);
 		entityRepo.addSemanticEntity(e);
-		return (Result) ok(toJson(Collections.singletonMap("status", "inserted")));
+		return (Result) created(toJson(Collections.singletonMap("status", "inserted")));
 	}
 
 	public static Result getById(String id) {
@@ -53,11 +49,14 @@ public class EntityController extends Controller {
 		return (Result) ok(toJson(entityRepo.entities()));
 		
 	}
-	public static Result entities(String name) {
+	public static Result entities(String name,String type) {
 		if (name == null)
 			return (Result) ok(toJson(entityRepo.entities()));
-		else
+		else if(name!=null && type==null)
 			return (Result) ok(toJson(entityRepo.findByName(name)));
+		else {
+			return (Result) ok(toJson(entityRepo.findByNameAndType(name, type)));
+		}
 	}
 
 }

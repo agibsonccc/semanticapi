@@ -4,7 +4,11 @@ import java.util.Collection;
 
 import com.ccc.sendalyzeit.expertsystem.model.Concept;
 import com.ccc.sendalyzeit.expertsystem.model.SemanticEntity;
-
+/**
+ * DAO for concepts
+ * @author Adam Gibson
+ *
+ */
 public interface ConceptRepository {
 
 	

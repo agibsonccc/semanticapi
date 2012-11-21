@@ -40,7 +40,7 @@ public class ConceptController extends Controller {
 		Gson gson = new GsonBuilder().create();
 		Concept c = gson.fromJson(concept, Concept.class);
 		conceptRepository.addConcept(c);
-		return (Result) ok(toJson(Collections.singletonMap("status", "inserted")));
+		return (Result) created(toJson(Collections.singletonMap("status", "inserted")));
 	}
 
 	public static Result byId(String id) {

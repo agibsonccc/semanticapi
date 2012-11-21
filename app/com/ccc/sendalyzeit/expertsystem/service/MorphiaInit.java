@@ -12,7 +12,13 @@ import com.github.jmkgreen.morphia.Morphia;
 import com.github.jmkgreen.morphia.logging.MorphiaLoggerFactory;
 import com.github.jmkgreen.morphia.logging.slf4j.SLF4JLogrImplFactory;
 import com.mongodb.Mongo;
-
+/**
+ * Class for handling morphia 
+ * initialization including logging.
+ * 
+ * @author Adam Gibson
+ *
+ */
 @Component("morphiainit")
 public class MorphiaInit {
 	@Inject

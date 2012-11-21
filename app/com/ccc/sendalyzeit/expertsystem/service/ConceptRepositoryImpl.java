@@ -1,6 +1,8 @@
 package com.ccc.sendalyzeit.expertsystem.service;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -67,8 +69,12 @@ public class ConceptRepositoryImpl extends BasicDAO<Concept, Long> implements
 
 	@Override
 	public Collection<Concept> conceptsForSemanticEntity(SemanticEntity entity) {
-		// TODO Auto-generated method stub
-		return null;
+		Collection<Concept> l1= ds.find(Concept.class).field("second.id").equal(entity.getId()).asList(),
+				l2=ds.find(Concept.class).field("first.id").equal(entity.getId()).asList();
+		List<Concept> ret = new ArrayList<Concept>();
+		ret.addAll(l1);
+		ret.addAll(l2);
+		return ret;
 	}
 
 }

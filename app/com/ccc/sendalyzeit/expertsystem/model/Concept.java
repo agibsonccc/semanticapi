@@ -11,6 +11,13 @@ import com.github.jmkgreen.morphia.annotations.Embedded;
 import com.github.jmkgreen.morphia.annotations.Entity;
 import com.github.jmkgreen.morphia.annotations.Id;
 import com.google.gson.Gson;
+
+/**
+ * A concept ties two entities together.
+ * A typical example could be works(employee,business)
+ * @author Adam Gibson
+ *
+ */
 @Entity("concept")
 public class Concept  implements Serializable, QueryStringBindable<Concept> {
 

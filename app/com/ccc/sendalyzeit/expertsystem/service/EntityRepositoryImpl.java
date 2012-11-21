@@ -63,4 +63,14 @@ public class EntityRepositoryImpl extends BasicDAO<SemanticEntity, Long>
 			super.delete(e);
 	}
 
+	@Override
+	public List<SemanticEntity> findByNameAndType(String name, String type) {
+		return ds.find(SemanticEntity.class).filter("name", name).filter("type", type).asList();
+	}
+
+	@Override
+	public List<SemanticEntity> findByType(String type) {
+		return ds.find(SemanticEntity.class).filter("type", type).asList();
+	}
+
 }
