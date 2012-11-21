@@ -29,6 +29,7 @@ public class EntityController extends Controller {
 		String entity=request().body().asJson().toString();
 		Gson gson=new GsonBuilder().create();
 		SemanticEntity e=gson.fromJson(entity, SemanticEntity.class);
+		//save entities
 		entityRepo.addSemanticEntity(e);
 		return (Result) created(toJson(Collections.singletonMap("status", "inserted")));
 	}
