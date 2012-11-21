@@ -1,0 +1,335 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:sec="http://www.springframework.org/schema/security" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:oauth="http://www.springframework.org/schema/security/oauth2"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.1.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.1.xsd http://www.springframework.org/schema/security/oauth2 http://www.springframework.org/schema/security/spring-security-oauth2-1.0.xsd">
+	<bean id="oauthAccessDeniedHandler"
+		class="org.springframework.security.oauth2.provider.error.OAuth2AccessDeniedHandler" />
+
+	<bean id="clientCredentialsTokenEndpointFilter"
+		class="org.springframework.security.oauth2.provider.client.ClientCredentialsTokenEndpointFilter">
+		<property name="authenticationManager" ref="clientAuthenticationManager" />
+	</bean>
+
+	<bean id="accessDecisionManager" class="org.springframework.security.access.vote.UnanimousBased"
+		xmlns="http://www.springframework.org/schema/beans">
+		<constructor-arg>
+			<list>
+				<bean class="org.springframework.security.oauth2.provider.vote.ScopeVoter" />
+				<bean class="org.springframework.security.access.vote.RoleVoter" />
+				<bean class="org.springframework.security.access.vote.AuthenticatedVoter" />
+			</list>
+		</constructor-arg>
+	</bean>
+
+	<oauth:authorization-server
+		client-details-service-ref="clientDetails" token-services-ref="tokenServices"
+		user-approval-handler-ref="userApprovalHandler">
+		<oauth:authorization-code />
+		<oauth:implicit />
+		<oauth:refresh-token />
+		<oauth:client-credentials />
+		<oauth:password />
+	</oauth:authorization-server>
+
+	<bean id="clientDetails" class="org.springframework.security.oauth2.provider.token.JdbcTokenStore">
+	</bean>
+		<!-- Database access -->
+	<bean id="dataSource"
+		class="org.springframework.jdbc.datasource.DriverManagerDataSource"
+		depends-on="propertyPlaceHolderConfigurer">
+		<property name="driverClassName" value="${hibernate.driver}" />
+		<property name="url" value="${hibernate.url}" />
+		<property name="username" value="${hibernate.user}" />
+		<property name="password" value="${hibernate.password}" />
+	</bean>
+	<!-- Security beans -->
+	
+	<bean id="clientDetailsUserService"
+		class="org.springframework.security.oauth2.provider.client.ClientDetailsUserDetailsService">
+		<constructor-arg ref="clientDetails" />
+	</bean>
+	<bean id="tokenStore"
+		class="org.springframework.security.oauth2.provider.token.InMemoryTokenStore" />
+	<bean id="tokenServices"
+		class="org.springframework.security.oauth2.provider.token.DefaultTokenServices">
+		<property name="tokenStore" ref="tokenStore" />
+		<property name="supportRefreshToken" value="true" />
+		<property name="clientDetailsService" ref="clientDetails" />
+	</bean>
+
+
+	<http pattern="/oauth/token" create-session="stateless"
+		authentication-manager-ref="clientAuthenticationManager"
+		entry-point-ref="oauthAuthenticationEntryPoint" xmlns="http://www.springframework.org/schema/security">
+		<intercept-url pattern="/oauth/token" access="IS_AUTHENTICATED_FULLY" />
+		<anonymous enabled="false" />
+		<http-basic entry-point-ref="oauthAuthenticationEntryPoint" />
+		<!-- include this only if you need to authenticate clients via request 
+			parameters -->
+		<custom-filter ref="clientCredentialsTokenEndpointFilter"
+			before="BASIC_AUTH_FILTER" />
+		<access-denied-handler ref="oauthAccessDeniedHandler" />
+	</http>
+
+
+	<http pattern="/observe/**" create-session="never"
+		entry-point-ref="oauthAuthenticationEntryPoint"
+		access-decision-manager-ref="accessDecisionManager"
+		xmlns="http://www.springframework.org/schema/security">
+		<anonymous enabled="false" />
+		<intercept-url pattern="/observe" access="user,SCOPE_WRITE" />
+		<custom-filter ref="resourceServerFilter" before="PRE_AUTH_FILTER" />
+		<access-denied-handler ref="oauthAccessDeniedHandler" />
+	</http>
+
+	<http pattern="/entity/**" create-session="never"
+		entry-point-ref="oauthAuthenticationEntryPoint"
+		access-decision-manager-ref="accessDecisionManager"
+		xmlns="http://www.springframework.org/schema/security">
+		<anonymous enabled="false" />
+		<intercept-url pattern="/entity" access="user,SCOPE_READ" />
+		<intercept-url pattern="/entity/**" access="ROLE_CLIENT,SCOPE_TRUST" />
+		<custom-filter ref="resourceServerFilter" before="PRE_AUTH_FILTER" />
+		<access-denied-handler ref="oauthAccessDeniedHandler" />
+	</http>
+
+
+	<http pattern="/concept/**" create-session="never"
+		entry-point-ref="oauthAuthenticationEntryPoint"
+		access-decision-manager-ref="accessDecisionManager"
+		xmlns="http://www.springframework.org/schema/security">
+		<anonymous enabled="false" />
+		<intercept-url pattern="/concept" access="ROLE_USER,SCOPE_READ" />
+		<intercept-url pattern="/concept/**"
+			access="ROLE_USER,SCOPE_READ,SCOPE_WRITE" />
+		<custom-filter ref="resourceServerFilter" before="PRE_AUTH_FILTER" />
+		<access-denied-handler ref="oauthAccessDeniedHandler" />
+	</http>
+	<!-- Handles spring expression language -->
+	<bean
+		class="org.springframework.security.web.access.expression.WebExpressionVoter"
+		id="webExpressionVoter">
+		<property name="expressionHandler" ref="expressionHandler" />
+	</bean>
+	<!-- Authenticates user credentials based on database -->
+	<bean id="daoAuthenticationProvider" class="com.ccc.security.MyDaoAuth">
+		<property name="userDetailsService" ref="userService" />
+		<property name="passwordEncoder" ref="passwordEncoder" />
+		<property name="saltSource" ref="saltSource" />
+	</bean>
+
+	<!-- Publishes login events -->
+	<bean id="defaultAuthEventPublisher"
+		class="org.springframework.security.authentication.DefaultAuthenticationEventPublisher" />
+
+	<!-- Filters -->
+	<!-- PAY ATTENTION TO ORDER HERE, THE ORDER THE FILTERS ARE DEFINED IN MATTERS. 
+		Reason can be found here: http://static.springsource.org/spring-security/site/docs/3.1.x/reference/security-filter-chain.html -->
+	<bean id="springSecurityFilterChain" class="com.ccc.security.MyProxy">
+		<sec:filter-chain-map path-type="ant">
+			<sec:filter-chain pattern="/**"
+				filters="securityContextPersistenceFilter, usernamePasswordAuthenticationFilter,securityContextHolderAwareRequestFilter,rememberMeAuthenticationFilter,anonymousAuthenticationFilter, exceptionTranslationFilter,logoutEventBroadCaster" />
+
+
+		</sec:filter-chain-map>
+	</bean>
+
+
+	<!--Filters remember me requests. -->
+	<bean id="rememberMeAuthenticationFilter"
+		class="org.springframework.security.web.authentication.rememberme.RememberMeAuthenticationFilter">
+		<property name="rememberMeServices" ref="rememberMeServices" />
+		<property name="authenticationManager" ref="customAuthenticationManager" />
+	</bean>
+
+	<!-- Figures out exceptions if they are thrown to give a more coherent error 
+		message -->
+	<bean id="exceptionTranslationFilter"
+		class="org.springframework.security.web.access.ExceptionTranslationFilter">
+		<property name="authenticationEntryPoint" ref="authenticationEntryPoint" />
+		<property name="accessDeniedHandler" ref="accessDeniedHandler" />
+	</bean>
+
+	<!-- Provides additional request information further down the filter chain -->
+	<bean id="securityContextHolderAwareRequestFilter"
+		class="org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter" />
+
+	<!-- Manages the security context (session information) -->
+	<bean id="securityContextPersistenceFilter" class="com.ccc.security.MySecurityContextPersistenceFilter" />
+
+	<!-- Anonymous access -->
+	<bean id="anonymousAuthenticationFilter" class="com.ccc.security.MyAnonymousFilter">
+		<property name="userAttribute" value="anonymousUser,anonymous" />
+		<property name="key"
+			value="ccq348t97q8fgua8dfvujadiofgjqe0893uq9tq35gj8qebu8q95yt9qgryu" />
+	</bean>
+
+	<!-- End Filters -->
+	<bean id="anonymousAuthenticationProvider"
+		class="org.springframework.security.authentication.AnonymousAuthenticationProvider">
+		<property name="key"
+			value="ccq348t97q8fgua8dfvujadiofgjqe0893uq9tq35gj8qebu8q95yt9qgryu" />
+	</bean>
+
+
+	<!-- Password encryption -->
+	<bean class="com.ccc.security.MyPasswordEncoder" id="passwordEncoder" />
+	<!-- A salt source is used to tell what property of the user to encrypt 
+		for each password. -->
+	<bean class="com.ccc.remoting.httpinvoker.SerializableReflectionSaltSource"
+		id="saltSource">
+		<!-- Property to be concatneated -->
+		<property name="userPropertyToUse" value="username" />
+	</bean>
+
+
+	<!-- Handles Spring Expression language -->
+	<bean
+		class="org.springframework.security.web.access.expression.DefaultWebSecurityExpressionHandler"
+		id="expressionHandler" />
+
+	<!-- Handles redirects to logout page -->
+	<bean id="logoutHandler"
+		class="org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler" />
+
+
+
+	<bean id="logoutEventBroadCaster" class="com.ccc.users.filters.logout.LogoutEventBroadcaster" />
+
+	<!-- Controls redirects to an access denied page when user isn't authenticated -->
+	<bean id="accessDeniedHandler"
+		class="org.springframework.security.web.access.AccessDeniedHandlerImpl">
+		<property name="errorPage" value="/login?error=invalid_pass" />
+	</bean>
+
+	<!-- Handles remember me function. -->
+	<bean id="rememberMeServices"
+		class="org.springframework.security.web.authentication.rememberme.PersistentTokenBasedRememberMeServices">
+		<property name="key"
+			value="ccq348t97q8fguaadjsfalksdfjkiofgjqe0893uq9tq35gj8qebu8q95yt9qgryu" />
+		<property name="tokenValiditySeconds" value="3600" />
+		<property name="tokenRepository" ref="jdbcRememberMeTokenRepository" />
+		<property name="userDetailsService" ref="userService" />
+	</bean>
+	<!-- Database remember me based. -->
+	<bean id="jdbcRememberMeTokenRepository"
+		class="org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+
+	<bean id="rememberMeAuthenticationProvider"
+		class="org.springframework.security.authentication.RememberMeAuthenticationProvider">
+		<property name="key"
+			value="ccq348t97q8fguaadjsfalksdfjkiofgjqe0893uq9tq35gj8qebu8q95yt9qgryu" />
+	</bean>
+
+	<!-- Watches for login connections from the request /j_spring_security_check -->
+	<bean class="com.ccc.security.MyUsernamePasswordAuthenticationFilter"
+		id="usernamePasswordAuthenticationFilter">
+		<!-- <property name="sessionAuthenticationStrategy" ref="sas" /> -->
+		<property name="authenticationManager" ref="customAuthenticationManager" />
+		<property name="rememberMeServices" ref="rememberMeServices" />
+		<property name="authenticationFailureHandler" ref="customAuthenticationFailureHandler">
+		</property>
+		<property name="authenticationSuccessHandler" ref="redirectRoleStrategy">
+		</property>
+	</bean>
+
+	<!-- We just actually need to set the default failure url here -->
+	<bean id="customAuthenticationFailureHandler"
+		class="org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler">
+		<property name="defaultFailureUrl" value="/?error=wrong_password" />
+	</bean>
+	<!-- We just actually need to set the default target url here -->
+	<bean id="customAuthenticationSuccessHandler"
+		class="org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler">
+		<property name="defaultTargetUrl" value="/login" />
+	</bean>
+
+	<!-- Log in entry point, access denied entry point -->
+	<bean id="authenticationEntryPoint"
+		class="org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint">
+		<property name="loginFormUrl" value="/login" />
+	</bean>
+
+	<!-- Handles information about all of the login session -->
+	<bean id="sessionRegistry"
+		class="com.ccc.remoting.httpinvoker.SerializableSessionRegistryImpl" />
+
+
+	<bean id="redirectRoleStrategy"
+		class="com.ccc.security.entrypoints.RolebasedAuthenticationSuccessHandler">
+		<property name="rolesToUrls">
+			<map>
+				<entry key="admin" value="/app/view" />
+				<entry key="user" value="/app/view" />
+			</map>
+		</property>
+	</bean>
+
+	<!-- a concrete concurrent control strategy -->
+	<bean id="sas"
+		class="org.springframework.security.web.authentication.session.ConcurrentSessionControlStrategy">
+		<property name="maximumSessions" value="3" />
+		<constructor-arg name="sessionRegistry" ref="sessionRegistry" />
+	</bean>
+
+	<bean id="concurrencyFilter"
+		class="org.springframework.security.web.session.ConcurrentSessionFilter">
+		<property name="sessionRegistry" ref="sessionRegistry" />
+		<property name="expiredUrl" value="/" />
+	</bean>
+
+
+
+
+	<!-- Spring Security name space configuration -->
+	<sec:http auto-config="false" use-expressions="true"
+		create-session="never" access-denied-page="/" entry-point-ref="authenticationEntryPoint">
+		<sec:intercept-url pattern="/signup/**" access="!isAuthenticated()" />
+		<sec:intercept-url pattern="/account/**" access="!isAuthenticated()" />
+		<sec:intercept-url pattern="/encrypt/**" access="!isAuthenticated()" />
+		<!-- <sec:intercept-url pattern="/encrypt/**" access="hasRole('admin')" 
+			/> -->
+		<sec:intercept-url pattern="/view/**" access="isAuthenticated()" />
+
+
+		<sec:custom-filter ref="usernamePasswordAuthenticationFilter"
+			position="FORM_LOGIN_FILTER" />
+		<!-- <sec:custom-filter ref="concurrencyFilter" position="CONCURRENT_SESSION_FILTER" 
+			/> -->
+
+		<sec:anonymous username="anonymousUser"
+			granted-authority="anonymous" />
+		<!-- <sec:form-login authentication-success-handler-ref="redirectRoleStrategy"/> -->
+		<sec:logout invalidate-session="true" logout-success-url="/" />
+		<sec:session-management
+			session-authentication-strategy-ref="sas" invalid-session-url="/">
+
+		</sec:session-management>
+		<sec:remember-me />
+	</sec:http>
+	<!-- If http is defined, the authentication manager is required, just point 
+		it to the daoAuthenticationProvider -->
+	<sec:authentication-manager alias="authenticationManager"
+		erase-credentials="false">
+		<sec:authentication-provider ref="daoAuthenticationProvider" />
+	</sec:authentication-manager>
+
+
+
+	<!-- Handles authentication based on the list of providers -->
+	<bean id="customAuthenticationManager" class="com.ccc.security.CustomAuthenticationManager">
+		<property name="authenticationEventPublisher" ref="defaultAuthEventPublisher" />
+		<property name="providers">
+			<list>
+				<ref local="daoAuthenticationProvider" />
+				<ref local="rememberMeAuthenticationProvider" />
+			</list>
+		</property>
+		<property name="eraseCredentialsAfterAuthentication" value="false" />
+	</bean>
+</beans>

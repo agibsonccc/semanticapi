@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:mongo="http://www.springframework.org/schema/data/mongo"
+
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.1.xsd	
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd http://www.springframework.org/schema/data/mongo
+          http://www.springframework.org/schema/data/mongo/spring-mongo-1.0.xsd">
+	<context:component-scan base-package="com.ccc.sendalyzeit" />
+	<!-- Properties files -->
+	<bean id="propertyPlaceHolderConfigurer"
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="ignoreUnresolvablePlaceholders" value="true" />
+		<property name="locations">
+			<list>
+				<value>hibernate.properties</value>
+				<value>ai.properties</value>
+
+			</list>
+		</property>
+	</bean>
+
+
+
+
+
+
+
+
+	<!-- View resolver configuration. -->
+	<!--Both beans are needed for annotation based resolving of beans. -->
+	<bean
+		class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping" />
+	<bean
+		class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter" />
+	<!-- View Resolver -->
+	<bean id="viewResolver"
+		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="viewClass">
+			<value>org.springframework.web.servlet.view.JstlView</value>
+		</property>
+		<!-- Folders the views are in -->
+		<property name="prefix">
+			<value>/WEB-INF/jsp/</value>
+		</property>
+		<property name="suffix">
+			<value>.jsp</value>
+		</property>
+	</bean>
+	<!-- End View Resolver configuration. -->
+
+
+
+	<!-- JBoss only <bean id="jsonType" class="javax.ws.rs.core.MediaType" factory-method="valueOf"> 
+		<constructor-arg value="application/json" /> </bean> <bean id="xmlType" class="javax.ws.rs.core.MediaType" 
+		factory-method="valueOf"> <constructor-arg value="application/xml" /> </bean> 
+		<bean id="resteasy.dispatcher" class="org.jboss.resteasy.core.SynchronousDispatcher" 
+		depends-on="resteasy.intializer"> <constructor-arg ref="resteasy.providerFactory" 
+		/> <property name="mediaTypeMappings"> <map> <entry key="json" value-ref="jsonType" 
+		/> <entry key="xml" value-ref="xmlType" /> </map> </property> </bean> -->
+
+
+	<!-- End JBoss only -->
+	<!-- File upload properties <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver"> 
+		<property name="maxUploadSize"> <value>1000000</value> </property> </bean> -->
+
+	<bean id="multipartResolverCommons"
+		class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+
+		<!-- one of the properties available; the maximum file size in bytes -->
+		<property name="maxUploadSize" value="100000" />
+	</bean>
+
+	<bean id="multipartResolver"
+		class="org.springframework.web.multipart.support.StandardServletMultipartResolver">
+	</bean>
+
+
+	<mvc:annotation-driven>
+		<mvc:message-converters>
+			<!-- <bean class="com.ccc.webapp.http.mappers.MappingJacksonJsonpMessageConverter"> 
+				<property name="supportedMediaTypes"> <list> <value>application/x-javascript</value> 
+				</list> </property> </bean> -->
+			<bean
+				class="org.springframework.http.converter.json.MappingJacksonHttpMessageConverter">
+				<property name="supportedMediaTypes">
+					<list>
+						<value>application/json</value>
+					</list>
+				</property>
+			</bean>
+			<bean
+				class="org.springframework.http.converter.xml.MarshallingHttpMessageConverter">
+				<property name="marshaller" ref="jaxb2Marshaller" />
+				<property name="unmarshaller" ref="jaxb2Marshaller" />
+				<property name="supportedMediaTypes">
+					<list>
+						<value>application/xml</value>
+						<value>text/html</value>
+
+					</list>
+				</property>
+			</bean>
+		</mvc:message-converters>
+	</mvc:annotation-driven>
+
+	<bean
+		class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver">
+		<property name="favorPathExtension" value="true" />
+		<property name="mediaTypes">
+			<map>
+				<entry key="json" value="application/json" />
+				<entry key="jsonp" value="application/javascript" />
+				<entry key="xml" value="application/xml" />
+				<entry key="html" value="text/html" />
+
+			</map>
+		</property>
+		<property name="defaultViews">
+			<list>
+				<bean
+					class="org.springframework.web.servlet.view.json.MappingJacksonJsonView" />
+				<bean class="com.ccc.webapp.http.mappers.MappingJacksonJsonpView" />
+					
+			</list>
+		</property>
+	</bean>
+	<!-- Web Based Exception Handling -->
+	<bean id="exceptionResolver"
+		class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
+		<property name="exceptionMappings">
+			<props>
+				<prop key="org.hibernate.exception.JDBCConnectionException">dberror</prop>
+				<prop key="org.springframework.dao.DataIntegrityViolationException">dberror</prop>
+			</props>
+		</property>
+	</bean>
+
+
+
+
+
+
+	<!-- Part of speech tagging -->
+	<bean id="posService" class="com.ccc.sentimentdictionary.PosService" />
+	<bean id="mongo" class="com.mongodb.Mongo">
+		<property name="host" value="localhost" />
+	</bean>
+	<bean id="morphia" class="com.google.code.morphia.Morphia">
+	
+	</bean>
+	<import resource="/com/ccc/sendalyzeit/expertsystem/conf/mvc-config.xml" />
+
+	<import resource="/com/ccc/sendalyzeit/expertsystem/conf/appconfig-authentication.xml" />
+	<import resource="/com/ccc/sendalyzeit/expertsystem/conf/appconfig-mongo.xml" />
+
+	<!-- Malt parser -->
+	<bean id="maltParserEngineFactory"
+		class="com.ccc.relationextraction.relationextraction.MaltParserEngineFactory">
+		<property name="wordNetPath" value="${wordnet.dir}" />
+		<property name="maltParserPath" value="${maltparser.path}" />
+		<property name="timeClassifierPath" value="${timeclassifier.path}" />
+		<property name="eventClassifierPath" value="${eventlassifier.path}" />
+
+	</bean>
+
+
+	<!-- Spam service -->
+	<bean id="spamService" class="com.ccc.spamservice.SpamService"
+		init-method="load">
+		<property name="trainingDir" value="${spam.trainingdir}" />
+	</bean>
+	<!-- Sentiment analysis -->
+	<bean id="classFirstScorer" class="com.ccc.sentimentdictionary.ClassAdjectiveScorer"
+		init-method="load">
+		<constructor-arg index="0" value="${sentiment.trainingdir}"></constructor-arg>
+	</bean>
+	<bean id="sentimentService" class="com.ccc.sentimentdictionary.SentimentService"
+		init-method="init">
+		<property name="classAdjectiveScorer" ref="classFirstScorer" />
+		<property name="wordnetDir" value="${wordnet.dir}" />
+		<property name="adverbDir" value="${sentiment.trainingdir}" />
+	</bean>
+
+
+
+
+	<!-- Core service for interfacing with UIMA -->
+	<bean id="uimaService"
+		class="com.ccc.nlp.freya.service.UimaService"
+		init-method="init">
+		<property name="engineFactory" ref="maltParserEngineFactory" />
+	</bean>
+
+	<mvc:annotation-driven />
+
+
+	<bean id="validator"
+		class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean" />
+
+</beans>
