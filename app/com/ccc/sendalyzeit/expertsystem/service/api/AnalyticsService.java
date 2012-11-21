@@ -17,4 +17,6 @@ public interface AnalyticsService {
 	
 	public Collection<SemanticEntity> observeEntities(String text) throws AnalysisEngineProcessException, ResourceInitializationException, CollectionException, IOException, Exception;
 	
+	
+	
 }

@@ -3,7 +3,11 @@ package com.ccc.sendalyzeit.expertsystem.service.api;
 import java.util.List;
 
 import com.ccc.sendalyzeit.expertsystem.model.SemanticEntity;
-
+/**
+ * Repository for 
+ * @author agibsonccc
+ *
+ */
 public interface EntityRepository {
 	
 	
