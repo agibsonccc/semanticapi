@@ -49,13 +49,13 @@ public class EntityController extends Controller {
 		return (Result) ok(toJson(entityRepo.entities()));
 		
 	}
-	public static Result entities(String name,String type) {
-		if (name == null)
+	public static Result entities(String name,String entityType) {
+		if (name == null && entityType==null)
 			return (Result) ok(toJson(entityRepo.entities()));
-		else if(name!=null && type==null)
+		else if(name!=null && entityType==null)
 			return (Result) ok(toJson(entityRepo.findByName(name)));
 		else {
-			return (Result) ok(toJson(entityRepo.findByNameAndType(name, type)));
+			return (Result) ok(toJson(entityRepo.findByNameAndType(name, entityType)));
 		}
 	}
 
